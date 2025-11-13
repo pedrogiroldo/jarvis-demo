@@ -51,9 +51,11 @@ export class AudioService {
             case sdk.ResultReason.NoMatch:
               console.log('NOMATCH: Speech could not be recognized.');
               recognizer.close();
-              resolve({
-                text: '',
-              });
+              reject(
+                new Error(
+                  'Não foi possível reconhecer fala no áudio fornecido',
+                ),
+              );
               break;
             case sdk.ResultReason.Canceled: {
               const cancellation = sdk.CancellationDetails.fromResult(result);
