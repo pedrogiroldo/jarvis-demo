@@ -172,21 +172,64 @@
         animation: blink 1s linear infinite;
       }
 
-      @keyframes blink {
-        0%,
-        50% {
-          opacity: 1;
-        }
-        51%,
-        100% {
-          opacity: 0.3;
-        }
+      .instructions {
+        background: #f0f8ff;
+        border: 2px solid #667eea;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .instructions h2 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 20px;
+      }
+
+      .instructions p {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      .examples {
+        background: #e8f4fd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+      }
+
+      .examples strong {
+        color: #667eea;
       }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>🎤 Jarvis Demo</h1>
+
+      <div class="instructions">
+        <h2>Como usar</h2>
+        <p>Clique em "Iniciar Gravação" e fale uma das seguintes instruções:</p>
+        <div class="examples">
+          <p>
+            <strong>Para chamar um cozinheiro:</strong> "Preciso de um
+            cozinheiro" ou "Chame um chef"
+          </p>
+          <p>
+            <strong>Para chamar um motorista:</strong> "Preciso de um motorista"
+            ou "Chame um driver"
+          </p>
+          <p>
+            <strong>Para chamar ambos:</strong> "Preciso de um cozinheiro e um
+            motorista"
+          </p>
+        </div>
+        <p>
+          Após falar, clique em "Parar Gravação" para processar sua solicitação.
+        </p>
+      </div>
 
       <div class="counters">
         <div class="counter">
