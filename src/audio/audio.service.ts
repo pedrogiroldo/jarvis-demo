@@ -1,32 +1,84 @@
 import { Injectable } from '@nestjs/common';
-import { OpenAI } from 'openai';
+import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 import * as fs from 'fs';
 import { TranscribeResponseDto } from './dto/transcribe-response.dto';
 
 @Injectable()
 export class AudioService {
-  private openaiClient: OpenAI;
+  private speechConfig: sdk.SpeechConfig;
 
   constructor() {
-    this.openaiClient = new OpenAI();
+    const subscriptionKey = process.env.AZURE_SPEECH_KEY;
+    const region = process.env.AZURE_SPEECH_REGION;
+
+    if (!subscriptionKey || !region) {
+      throw new Error(
+        'AZURE_SPEECH_KEY and AZURE_SPEECH_REGION must be set in environment variables',
+      );
+    }
+
+    this.speechConfig = sdk.SpeechConfig.fromSubscription(
+      subscriptionKey,
+      region,
+    );
+    this.speechConfig.speechRecognitionLanguage = 'pt-BR';
   }
 
   async transcribeAudio(filePath: string): Promise<TranscribeResponseDto> {
-    const audioBuffer = fs.readFileSync(filePath);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const audioFile = new (File as any)([audioBuffer], 'audio.mp3', {
-      type: 'audio/mpeg',
-    });
+    return new Promise((resolve, reject) => {
+      // Usar fromWavFileInput para arquivos WAV
+      const audioBuffer = fs.readFileSync(filePath);
+      const audioConfig = sdk.AudioConfig.fromWavFileInput(audioBuffer);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const transcript = await this.openaiClient.audio.transcriptions.create({
-      file: audioFile,
-      model: 'whisper-1',
-      language: 'pt',
-    });
+      const recognizer = new sdk.SpeechRecognizer(
+        this.speechConfig,
+        audioConfig,
+      );
 
-    return {
-      text: transcript.text,
-    };
+      // Usar recognizeOnceAsync para reconhecimento simples
+      recognizer.recognizeOnceAsync(
+        (result) => {
+          console.log(`Recognition result reason: ${result.reason}`);
+
+          switch (result.reason) {
+            case sdk.ResultReason.RecognizedSpeech:
+              console.log(`RECOGNIZED: Text=${result.text}`);
+              recognizer.close();
+              resolve({
+                text: result.text,
+              });
+              break;
+            case sdk.ResultReason.NoMatch:
+              console.log('NOMATCH: Speech could not be recognized.');
+              recognizer.close();
+              resolve({
+                text: '',
+              });
+              break;
+            case sdk.ResultReason.Canceled: {
+              const cancellation = sdk.CancellationDetails.fromResult(result);
+              console.error(
+                `CANCELED: Reason=${cancellation.reason}, ErrorDetails=${cancellation.errorDetails}`,
+              );
+              recognizer.close();
+              reject(
+                new Error(
+                  `Speech recognition canceled: ${cancellation.errorDetails || cancellation.reason}`,
+                ),
+              );
+              break;
+            }
+            default:
+              recognizer.close();
+              reject(new Error(`Unexpected result reason: ${result.reason}`));
+          }
+        },
+        (error) => {
+          console.error(`Recognition error: ${error}`);
+          recognizer.close();
+          reject(new Error(`Failed to recognize speech: ${error}`));
+        },
+      );
+    });
   }
 }
