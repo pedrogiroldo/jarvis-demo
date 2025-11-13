@@ -86,7 +86,7 @@ export class AgentService {
         );
 
         const completion = await this.openai.chat.completions.create({
-          model: 'gpt-3.5-turbo',
+          model: 'nvidia/nemotron-nano-12b-v2-vl:free',
           temperature: 0.3,
           messages: [
             {
