@@ -1,14 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import OpenAI from 'openai';
 import { ActionResultDto } from './dto/action-result.dto';
+import { ChefService } from 'src/chef/chef.service';
+import { DriverService } from 'src/driver/driver.service';
 
 @Injectable()
 export class AgentService {
   private readonly logger = new Logger(AgentService.name);
   private readonly openai: OpenAI;
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(
+    private readonly chefService: ChefService,
+    private readonly driverService: DriverService,
+  ) {
     const apiKey = process.env.OPENAI_API_KEY;
     const baseURL = process.env.OPENAI_BASE_URL;
 
@@ -36,14 +40,14 @@ export class AgentService {
       const messages: string[] = [];
 
       if (actions.includes('chef')) {
-        await this.incrementChefCount();
+        await this.chefService.incrementChefCount();
         executedActions.push('chef');
         messages.push('Cozinheiro chamado');
         this.logger.log('Contador de cozinheiros incrementado');
       }
 
       if (actions.includes('driver')) {
-        await this.incrementDriverCount();
+        await this.driverService.incrementDriverCount();
         executedActions.push('driver');
         messages.push('Motorista chamado');
         this.logger.log('Contador de motoristas incrementado');
@@ -150,28 +154,5 @@ Não adicione pontuação extra ou explicações. Se não identificar nenhum, re
     }
 
     return [];
-  }
-
-  private async incrementChefCount() {
-    const chef = await this.prismaService.chef.findFirst();
-    if (chef) {
-      await this.prismaService.chef.update({
-        where: { id: chef.id },
-        data: { count: chef.count + 1 },
-      });
-    } else {
-      await this.prismaService.chef.create({ data: { count: 1 } });
-    }
-  }
-  private async incrementDriverCount() {
-    const driver = await this.prismaService.driver.findFirst();
-    if (driver) {
-      await this.prismaService.driver.update({
-        where: { id: driver.id },
-        data: { count: driver.count + 1 },
-      });
-    } else {
-      await this.prismaService.driver.create({ data: { count: 1 } });
-    }
   }
 }

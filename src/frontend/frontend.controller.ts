@@ -285,8 +285,8 @@ export class FrontendController {
         async function fetchCounts() {
             try {
                 const [chefResponse, driverResponse] = await Promise.all([
-                    fetch('/agent/chef'),
-                    fetch('/agent/driver')
+                    fetch('/chef'),
+                    fetch('/driver')
                 ]);
 
                 if (chefResponse.ok) {
