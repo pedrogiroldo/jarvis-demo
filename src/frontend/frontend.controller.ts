@@ -225,8 +225,9 @@ export class FrontendController {
 
         <div class="instructions">
             <h2>Como usar</h2>
-            <p>Clique em "Iniciar Gravação" e fale uma das seguintes instruções:</p>
+            <p>Clique em "Iniciar Gravação" e fale uma instrução clara sobre o que deseja. Como a instrução é interpretada por IA, não há uma forma específica de dizer - você pode falar de qualquer maneira, desde que seja claro exatamente o que quer.</p>
             <div class="examples">
+                <p><strong>Exemplos:</strong></p>
                 <p><strong>Para chamar um cozinheiro:</strong> "Preciso de um cozinheiro" ou "Chame um chef"</p>
                 <p><strong>Para chamar um motorista:</strong> "Preciso de um motorista" ou "Chame um driver"</p>
                 <p><strong>Para chamar ambos:</strong> "Preciso de um cozinheiro e um motorista"</p>
